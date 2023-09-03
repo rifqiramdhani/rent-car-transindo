@@ -54,14 +54,13 @@ const SidebarAdmin = ({ collapsed }) => {
                 </div>
             </div>
 
-          
             <Menu
                 defaultSelectedKeys={['dashboard']}
                 mode="vertical"
                 items={items}
                 theme="dark"
                 onSelect={selectMenuItem}
-                selectedKeys={[location.pathname.substring(7)]}
+                selectedKeys={[location.pathname.substring(1)]}
             />
         </Sider>
     )

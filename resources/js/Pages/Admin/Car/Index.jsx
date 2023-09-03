@@ -179,11 +179,9 @@ const Car = () => {
 
         setLoading(true);
 
-        fetch(`${origin}/api/cars?${qs.stringify(getRandomcarParams(tableParams))}`)
+        fetch(`${origin}/api/cars/index?${qs.stringify(getRandomcarParams(tableParams))}`)
             .then((res) => res.json())
             .then(({ data }) => {
-
-                console.log(data)
 
                 setDataCar(data.data);
                 setLoading(false);

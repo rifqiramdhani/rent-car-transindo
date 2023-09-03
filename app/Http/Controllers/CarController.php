@@ -56,7 +56,6 @@ class CarController extends Controller
     public function edit(Car $car)
     {
         //
-
         return Inertia::render('Admin/Car/Partials/EditCarForm', [
             'status' => session('status'),
             'cars' => $car
@@ -92,7 +91,6 @@ class CarController extends Controller
     {
         //
         $car->delete();
-
         return Redirect::route('car.index');
     }
 }

@@ -37,6 +37,18 @@ class CarApiController extends Controller
             $cars = $cars->get();
         }
 
+        $response = [
+            'status' => "success",
+            'message' => "Data successfully retrivied.",
+            'data' => $cars,
+        ];
+
+        return response()->json($response, 200);
+    }
+
+    public function availableCar(Request $request)
+    {
+        $cars = Car::where('is_available', '1')->get();
 
         $response = [
             'status' => "success",

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Faker\Provider\Fakecar;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class CarFactory extends Factory
 {
+
     /**
      * Define the model's default state.
      *
@@ -16,12 +18,15 @@ class CarFactory extends Factory
      */
     public function definition(): array
     {
+        $this->faker->addProvider(new Fakecar($this->faker));
+        $vehicle = $this->faker->vehicleArray();
+
         return [
             //
-            'brand' => fake()->name(),
-            'model' => fake()->name(),
-            'license_plate' => fake()->name(),
-            'rental_rate' => fake()->randomDigit() * 9999999999,
+            'brand' => $vehicle['brand'],
+            'model' => $vehicle['model'],
+            'license_plate' => $this->faker->vehicleRegistration,
+            'rental_rate' => round((fake()->randomDigit() + 1) * 200000, 0),
         ];
     }
 }

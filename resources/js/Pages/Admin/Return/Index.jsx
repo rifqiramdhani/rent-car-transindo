@@ -1,24 +1,14 @@
 import DashboardLayout from '@/Layouts/DashboardLayout'
 import React, { useEffect, useState } from 'react';
-import {
-    Table,
-    Input,
-    Button,
-    Dropdown,
-    Menu,
-    Popconfirm,
-    Tag,
-    Space,
-    DatePicker,
-    Form,
-    message,
-} from "antd";
+import { Table, Input, Button, Tag, Space, Form, message } from "antd";
 import qs from 'qs';
-import { MoreOutlined, PlusOutlined } from '@ant-design/icons';
-import { router, usePage, useForm, Link } from "@inertiajs/react";
+import { FaHackerNewsSquare } from 'react-icons/fa'
+import { router, usePage, useForm, Link,  } from "@inertiajs/react";
+import moment from 'moment';
 
-const Booking = () => {
-    const [dataBooking, setDataBooking] = useState();
+const Return = ({ flash }) => {
+    const user = usePage().props.auth.user;
+    const [dataReturn, setDataReturn] = useState();
     const [searchDate, setSearchDate] = useState([]);
     const [messageApi, contextHolder] = message.useMessage();
     const [loading, setLoading] = useState(false);
@@ -28,37 +18,28 @@ const Booking = () => {
             current: 1,
             pageSize: 10,
         },
-        keyword: ''
+        licensePlate: "",
+        userId: user.id,
     });
 
-    
-    const {
-    } = useForm({
-        id: '',
+    const {} = useForm({
+        id: "",
     });
 
-
-    
     /* handle book */
-    const handleBook = (id) => {
-        setLoadingButton(true)
+    const handleReturn = (id, carId) => {
+        setLoadingButton(true);
         router.post(
-            route("booking.store"),
+            route("return.store"),
             {
-                started_date: searchDate[0],
-                ended_date: searchDate[1],
-                car_id: id,
+                id: id,
+                car_id: carId,
             },
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    messageApi.success(
-                        "Your have successfully booking!",
-                        0.5,
-                        fetchData()
-                    );
+                    messageApi.success("Your have successfully return!", 0.5);
                     setLoadingButton(false);
-
                 },
                 onFinish: () => {
                     setLoadingButton(false);
@@ -79,60 +60,96 @@ const Booking = () => {
             title: "Brand",
             dataIndex: "brand",
             key: "brand",
+            render: (_, record) => {
+                return record.car.brand;
+            },
         },
-                        
+
         {
             title: "Model",
             dataIndex: "model",
             key: "model",
+            render: (_, record) => {
+                return record.car.model;
+            },
         },
         {
             title: "License Plate",
             dataIndex: "license_plate",
             key: "license_plate",
+            render: (_, record) => {
+                return record.car.license_plate;
+            },
         },
         {
             title: "Rental Rate",
             dataIndex: "rental_rate",
+            key: "rental_rate",
             render: (_, record) => {
-                return "Rp " + record.rental_rate;
+                return "Rp " + record.car.rental_rate;
             },
         },
         {
             title: "Status",
-            dataIndex: "is_available",
+            dataIndex: "is_return",
+            key: "is_return",
             render: (_, record) => {
                 let status =
-                    record.is_available == 1 ? (
-                        <Tag color="green">Available</Tag>
+                    record.is_return == 0 ? (
+                        <Tag color="green">Active</Tag>
                     ) : (
-                        <Tag color="red">Not Available</Tag>
+                        <Tag color="red">Already Returned</Tag>
                     );
 
                 return status;
             },
         },
         {
+            title: "Total Days",
+            dataIndex: "total_day",
+            render: (_, record) => {
+                let dateFrom = new moment(record.start_date);
+                let dateTo = new moment(record.end_date);
+                let diff = dateFrom.to(dateTo);
+                return diff.replace("in ", "");
+            },
+        },
+        {
+            title: "Total Cost",
+            dataIndex: "total_cost",
+            render: (_, record) => {
+                let dateFrom = new moment(record.start_date);
+                let dateTo = new moment(record.end_date);
+                let diff = dateFrom.to(dateTo);
+                let filterDiff = diff.replace("in ", "").replace("days", "");
+                let totalCost = parseInt(record.car.rental_rate) * parseInt(filterDiff);
+                return "Rp " + totalCost;
+            },
+        },
+        {
             title: "",
             dataIndex: "id",
             render: (_, record) => {
-                return (
-                    <Tag color="blue">
+                return record.is_return == 0 ? (
+                    <Tag color="blue" className="text-center">
                         <Button
-                            typeHtml="button"
                             type="text"
-                            onClick={() => handleBook(record.id)}
+                            onClick={() =>
+                                handleReturn(record.id, record.car.id)
+                            }
                             loading={loadingButton}
                         >
-                            Book Now
+                            Return Now
                         </Button>
                     </Tag>
+                ) : (
+                    ""
                 );
             },
         },
     ];
 
-    const getRandombookingParams = (params) => ({
+    const getRandomreturnParams = (params) => ({
         results: params.pagination?.pageSize,
         page: params.pagination?.current,
         ...params,
@@ -144,33 +161,30 @@ const Booking = () => {
         setLoading(true);
 
         fetch(
-            `${origin}/api/cars/available?${qs.stringify(
-                getRandombookingParams(tableParams)
+            `${origin}/api/returns?${qs.stringify(
+                getRandomreturnParams(tableParams)
             )}`
         )
             .then((res) => res.json())
-            .then(({ data }) => {
-
-                setDataBooking(data);
-                setLoading(false);
-                setTableParams({
-                    ...tableParams,
-                    pagination: {
-                        ...tableParams.pagination,
-                        total: data.length,
-                    },
-                });
+            .then(({ data, status, message }) => {
+                if (status) {
+                    setDataReturn(data);
+                    setLoading(false);
+                    setTableParams({
+                        ...tableParams,
+                        pagination: {
+                            ...tableParams.pagination,
+                            total: data.length,
+                        },
+                    });
+                } else {
+                    messageApi.error(message);
+                    setLoading(false);
+                }
             });
     };
 
-    
-
-    const handleTableChange= (
-        pagination,
-        filters,
-        sorter
-    ) => {
-
+    const handleTableChange = (pagination, filters, sorter) => {
         setTableParams({
             pagination,
             ...sorter,
@@ -178,16 +192,25 @@ const Booking = () => {
 
         // `dataSource` is useless since `pageSize` changed
         if (pagination.pageSize !== tableParams.pagination?.pageSize) {
-            setDataBooking([]);
+            setDataReturn([]);
         }
     };
 
     /* Handle Table */
 
-    const { RangePicker } = DatePicker;
+    useEffect(() => {
+        if(flash.status !== null){
+            if (flash.status) {
+                messageApi.success(flash.message);
+            } else {
+                messageApi.error(flash.message);
+            }
+        }
+        
+    }, [flash.status]);
 
     return (
-        <DashboardLayout title="Booking">
+        <DashboardLayout title="Return">
             {contextHolder}
             <div className="py-10">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -202,20 +225,28 @@ const Booking = () => {
                                         id="components-form-demo-normal-login"
                                     >
                                         <Form.Item
-                                            name="date"
-                                            label="Date"
+                                            name="license_plate"
+                                            label="License Plate"
                                             rules={[
                                                 {
                                                     required: true,
                                                     message:
-                                                        "Please input date!",
+                                                        "Please input License Plate!",
                                                 },
                                             ]}
-                                            
                                         >
-                                            <RangePicker
-                                                onChange={(dates, dateString) =>
-                                                    setSearchDate(dateString)
+                                            <Input
+                                                prefix={
+                                                    <FaHackerNewsSquare className="site-form-item-icon" />
+                                                }
+                                                placeholder="license Plate"
+                                                id="license_plate"
+                                                onChange={(e) =>
+                                                    setTableParams({
+                                                        ...tableParams,
+                                                        licensePlate:
+                                                            e.target.value,
+                                                    })
                                                 }
                                             />
                                         </Form.Item>
@@ -236,7 +267,7 @@ const Booking = () => {
                                     columns={columns}
                                     bordered
                                     rowKey={(record) => record.id}
-                                    dataSource={dataBooking}
+                                    dataSource={dataReturn}
                                     pagination={tableParams.pagination}
                                     loading={loading}
                                     onChange={handleTableChange}
@@ -250,4 +281,4 @@ const Booking = () => {
     );
 };
 
-export default Booking;
+export default Return;

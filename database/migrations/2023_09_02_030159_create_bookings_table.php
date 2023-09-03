@@ -17,6 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('car_id');
             $table->date('start_date');
             $table->date('end_date');
+            $table->enum('is_return', [0,1])->default(0);
+            $table->date('return_date')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');

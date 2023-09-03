@@ -1,10 +1,13 @@
 <?php
 
 use Inertia\Inertia;
+use App\Models\Booking;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
 
@@ -29,7 +32,19 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    $user_id = Auth::user()->id;
+    $booking = Booking::with(['user', 'car'])->where('bookings.user_id', $user_id)->get();
+    $countBooking = Booking::where('user_id', $user_id)->get()->count();
+    $countCarActive = Booking::where('user_id' , $user_id)->where('is_return' , '0')->get()->count();
+    $countCarReturn = Booking::where('user_id' , $user_id)->where('is_return' , '1')->get()->count();
+
+    return Inertia::render('Dashboard', [
+        'booking' => $booking,
+        'countBooking' => $countBooking,
+        'countCarActive' => $countCarActive,
+        'countCarReturn' => $countCarReturn,
+
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -41,6 +56,7 @@ Route::middleware('auth')->group(function () {
     'user' => UserController::class,
     'car' => CarController::class,
     'booking' => BookingController::class,
+    'return' => ReturnController::class,
 ]);
 
 });

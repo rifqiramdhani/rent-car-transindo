@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CarApiController;
 use App\Http\Controllers\Api\UserApiController;
+use App\Http\Controllers\Api\ReturnApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,5 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('users', [UserApiController::class, 'index']);
-Route::get('cars', [CarApiController::class, 'index']);
+Route::get('cars/index', [CarApiController::class, 'index']);
+Route::get('cars/available', [CarApiController::class, 'availableCar']);
+Route::get('returns', [ReturnApiController::class, 'index']);
 

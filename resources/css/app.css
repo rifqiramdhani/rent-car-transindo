@@ -109,3 +109,20 @@ span.hidden.md\:block.font-medium.text-pink-600 {
 img, svg, video, canvas, audio, iframe, embed, object{
   vertical-align: baseline!important;
 }
+
+.outline-header {
+font-family: sans-serif;
+   color: #fff;
+   text-shadow:
+       1px 1px 0 #000,
+     0px -1px 0 #000,  
+      1px -1px 0 #000,
+       1px 1px 0 #000;
+    font-size: 40px;
+}
+
+.outline-title {
+font-family: sans-serif;
+   color: #d19d3d;
+  
+}

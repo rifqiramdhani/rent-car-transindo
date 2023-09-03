@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Car;
 use Inertia\Inertia;
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
@@ -33,37 +35,32 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         //
-    }
+        $request->validate([
+            'started_date' => 'required',
+            'ended_date' => 'required',
+            'car_id' => 'required'
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Booking $booking)
-    {
-        //
-    }
+        $user_id = Auth::user()->id;
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Booking $booking)
-    {
-        //
-    }
+        $car = Car::find($request->car_id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Booking $booking)
-    {
-        //
-    }
+        if($car->is_available == 0){
+            return redirect('/booking')->with(['status'=> false, 'message' => 'Sorry, this car is not available']);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Booking $booking)
-    {
-        //
+        }
+
+        $booking = Booking::create([
+            'user_id' => $user_id,
+            'car_id' => $car->id,
+            'start_date' => $request->started_date,
+            'end_date' => $request->ended_date
+        ]);
+
+        $car->is_available = '0';
+        $car->save();
+
+        return redirect('/dashboard')->with(['status'=> true, 'message' => 'Your order has successfully']);
+
     }
 }

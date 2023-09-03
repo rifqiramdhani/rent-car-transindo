@@ -6,7 +6,7 @@ import {
     LogoutOutlined,
 } from "@ant-design/icons";
 import SidebarAdmin from "@/Components/Sidebar/Admin";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import {
     Layout,
     Button,
@@ -14,7 +14,6 @@ import {
     Avatar,
     Dropdown,
     Space,
-    Breadcrumb,
 } from "antd";
 
 const { Header, Content } = Layout;
@@ -45,24 +44,12 @@ const items = [
     },
 ];
 
-const itemRender = (route, params, items, paths) => {
-    const last = items.indexOf(route) === items.length - 1;
-    const { origin } = window.location;
+const DashboardLayout = ({title, children }) => {
 
-    return last ? (
-        <span>{route.title}</span>
-    ) : (
-        <Link href={origin + "/" + paths.join("/")}>{route.title}</Link>
-    );
-};
-
-const DashboardLayout = ({ title, children }) => {
     const [collapsed, setCollapsed] = useState(false);
-    const { pathname } = window.location;
     const {
         token: { colorBgContainer },
     } = theme.useToken();
-
     return (
         <Layout style={{ minHeight: "100vh" }} hasSider>
             <Head>
